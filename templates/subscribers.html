@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Newsletter Subscribers - Admin View{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>📊 Newsletter Subscribers</h1>
+    <p>Manage and view all newsletter subscribers</p>
+</div>
+
+<div class="stats">
+    <p>Total Subscribers</p>
+    <div class="number">{{ count }}</div>
+</div>
+
+{% if subscribers %}
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Interests</th>
+                    <th>Subscribed Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subscriber in subscribers %}
+                    <tr>
+                        <td>{{ subscriber.first_name }} {{ subscriber.last_name }}</td>
+                        <td>
+                            <a href="mailto:{{ subscriber.email }}" style="color: #667eea; text-decoration: none;">
+                                {{ subscriber.email }}
+                            </a>
+                        </td>
+                        <td>{{ subscriber.phone or 'N/A' }}</td>
+                        <td>{{ subscriber.interests or 'Not specified' }}</td>
+                        <td>
+                            {% if subscriber.created_at %}
+                                {{ subscriber.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="no-data">
+        <p>No subscribers yet. Start sharing your newsletter!</p>
+    </div>
+{% endif %}
+{% endblock %}
