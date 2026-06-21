@@ -8,12 +8,33 @@ import os
 # Configure OpenTelemetry to use Azure Monitor with the
 # APPLICATIONINSIGHTS_CONNECTION_STRING environment variable.
 configure_azure_monitor(
-    logger_name=__name__,  # Set the namespace for the logger in which you would like to collect telemetry for if you are collecting logging telemetry. This is imperative so you do not collect logging telemetry from the SDK itself.
+    logger_name="__name__",  # Set the namespace for the logger in which you would like to collect telemetry for if you are collecting logging telemetry. This is imperative so you do not collect logging telemetry from the SDK itself.
 )
 logger = logging.getLogger(__name__)  # Logging telemetry will be collected from logging calls made with this logger and all of it's children loggers.
 
 
 app = Flask(__name__)
+
+
+# Requests sent to the flask application will be automatically captured
+@app.route("/")
+def test():
+    return "Test flask request"
+
+# Exceptions that are raised within the request are automatically captured
+@app.route("/exception")
+def exception():
+    raise Exception("Hit an exception")  # pylint: disable=broad-exception-raised
+
+# Requests sent to this endpoint will not be tracked due to
+# flask_config configuration
+@app.route("/ignore")
+def ignore():
+    return "Request received but not tracked."
+
+if __name__ == "__main__":
+    app.run(host="localhost", port=8080)
+
 
 # Configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///newsletter.db')
