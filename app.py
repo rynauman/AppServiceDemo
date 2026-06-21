@@ -1,9 +1,17 @@
+import logging 
+from azure.monitor.opentelemetry import configure_azure_monitor
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from email_validator import validate_email, EmailNotValidError
 import os
-import logging 
-from azure.monitor.opentelemetry import configure_azure_monitor
+
+# Configure OpenTelemetry to use Azure Monitor with the
+# APPLICATIONINSIGHTS_CONNECTION_STRING environment variable.
+configure_azure_monitor(
+    logger_name="__name__",  # Set the namespace for the logger in which you would like to collect telemetry for if you are collecting logging telemetry. This is imperative so you do not collect logging telemetry from the SDK itself.
+)
+logger = logging.getLogger("__name__")  # Logging telemetry will be collected from logging calls made with this logger and all of it's children loggers.
+
 
 app = Flask(__name__)
 
@@ -12,12 +20,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:/
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
 
-# Configure OpenTelemetry to use Azure Monitor with the
-# APPLICATIONINSIGHTS_CONNECTION_STRING environment variable.
-configure_azure_monitor(
-    logger_name="__name__",  # Set the namespace for the logger in which you would like to collect telemetry for if you are collecting logging telemetry. This is imperative so you do not collect logging telemetry from the SDK itself.
-)
-logger = logging.getLogger("__name__")  # Logging telemetry will be collected from logging calls made with this logger and all of it's children loggers.
 
 # Initialize database
 db = SQLAlchemy(app)
